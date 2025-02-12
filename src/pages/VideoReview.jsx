@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 const API = import.meta.env.VITE_API_URL
 function VideoPage() {
-  const { wsid, vid } = useParams();
+  const { id } = useParams();
   const [video, setVideo] = useState(null);
   const [comments, setComments] = useState(null);
   const [commentText, setCommentText] = useState("");
@@ -14,7 +14,7 @@ function VideoPage() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await fetch(`${API}/api/video/${vid}`, {
+        const res = await fetch(`${API}/api/video/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
@@ -30,7 +30,7 @@ function VideoPage() {
     };
 
     fetchVideo();
-  }, [vid]);
+  }, [id]);
 
   const handleAddComment = async () => {
     if (!name.trim()) {
