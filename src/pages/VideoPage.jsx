@@ -68,7 +68,7 @@ function VideoPage() {
   };
 
   return (
-    <div className="p-6 flex gap-6 h-[90vh]">
+    <div className="p-6 flex flex-wrap md:flex-nowrap gap-6 h-[90vh]">
       {/* Video Section */}
       <div className="flex-1 flex flex-col">
         <h2 className="text-2xl font-bold mb-4">{video ? video.title : "Loading..."}</h2>
