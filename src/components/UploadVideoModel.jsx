@@ -1,4 +1,5 @@
 import { useState } from "react";
+const API = import.meta.env.VITE_API_URL
 
 function UploadVideoModal({ wsid, onClose, setVideos }) {
   const [videoFile, setVideoFile] = useState(null);
@@ -25,7 +26,7 @@ function UploadVideoModal({ wsid, onClose, setVideos }) {
     formData.append("workspaceId", wsid);
 
     try {
-      const res = await fetch("http://localhost:5000/api/video/upload", {
+      const res = await fetch(`${API}/api/video/upload`, {
         method: "POST",
         body: formData,
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

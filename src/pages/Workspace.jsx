@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UploadVideoModal from "../components/UploadVideoModel";
-
+const API = import.meta.env.VITE_API_URL
 function Workspace() {
   const { wsid } = useParams();
   const [videos, setVideos] = useState([]);
@@ -11,7 +11,7 @@ function Workspace() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/video?workspaceId=${wsid}`, {
+        const res = await fetch(`${API}/api/video?workspaceId=${wsid}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
 

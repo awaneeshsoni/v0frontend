@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
+const API = import.meta.env.VITE_API_URL
 
 function Dashboard() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -12,7 +13,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchWorkspaces = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/workspace", {
+        const res = await fetch(`${API}/api/workspace`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();

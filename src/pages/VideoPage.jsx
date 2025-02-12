@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-
+const API = import.meta.env.VITE_API_URL
 function VideoPage() {
   const { wsid, vid } = useParams();
   const [video, setVideo] = useState(null);
@@ -14,7 +14,7 @@ function VideoPage() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/video/${vid}`, {
+        const res = await fetch(`${API}/api/video/${vid}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
@@ -48,7 +48,7 @@ function VideoPage() {
     const newComment = { name, text: commentText, timestamp };
 
     try {
-      const res = await fetch(`http://localhost:5000/api/video/${vid}/comments`, {
+      const res = await fetch(`${API}/api/video/${vid}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newComment),

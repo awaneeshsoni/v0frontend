@@ -1,4 +1,5 @@
 import { useState } from "react";
+const API = import.meta.env.VITE_API_URL
 
 function CreateWorkspaceModal({ setShowModal, setWorkspaces }) {
   const [name, setName] = useState("");
@@ -15,7 +16,7 @@ function CreateWorkspaceModal({ setShowModal, setWorkspaces }) {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/workspace", {
+      const res = await fetch(`${API}/api/workspace`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
