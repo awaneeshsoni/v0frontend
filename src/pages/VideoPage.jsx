@@ -88,6 +88,7 @@ function VideoPage() {
       {/* Comments Section */}
       <div className="w-80 bg-gray-100 p-4 rounded-lg shadow flex flex-col">
         <h3 className="text-xl font-bold mb-3">Comments</h3>
+        <h5 className="text-sm mb-3">click the comment to see the frame the comment was related to</h5>
 
         {/* Error Message */}
         {error && <p className="text-red-500 mb-2">{error}</p>}
