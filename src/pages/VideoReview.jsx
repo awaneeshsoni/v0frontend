@@ -14,7 +14,7 @@ function VideoPage() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await fetch(`${API}/api/video/${id}`, {
+        const res = await fetch(`${API}/api/video/share/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
