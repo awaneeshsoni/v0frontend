@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 const API = import.meta.env.VITE_API_URL
-
 function VideoPage() {
-  const { id } = useParams();
+  const { wsid, vid } = useParams();
   const [video, setVideo] = useState(null);
   const [comments, setComments] = useState(null);
   const [commentText, setCommentText] = useState("");
@@ -15,7 +14,7 @@ function VideoPage() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await fetch(`${API}/api/video/${id}`, {
+        const res = await fetch(`${API}/api/video/${vid}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
@@ -31,7 +30,7 @@ function VideoPage() {
     };
 
     fetchVideo();
-  }, [id]);
+  }, [vid]);
 
   const handleAddComment = async () => {
     if (!name.trim()) {
@@ -69,7 +68,7 @@ function VideoPage() {
   };
 
   return (
-    <div className="p-6 flex gap-6 h-[90vh]">
+    <div className="p-6 flex flex-wrap md:flex-nowrap gap-6 h-[90vh]">
       {/* Video Section */}
       <div className="flex-1 flex flex-col">
         <h2 className="text-2xl font-bold mb-4">{video ? video.title : "Loading..."}</h2>
