@@ -48,7 +48,7 @@ function VideoPage() {
     const newComment = { name, text: commentText, timestamp };
 
     try {
-      const res = await fetch(`${API}/api/video/${vid}/comments`, {
+      const res = await fetch(`${API}/api/video/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newComment),
