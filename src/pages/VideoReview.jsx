@@ -44,7 +44,7 @@ function VideoPage() {
         const fetchVideo = async () => {
             try {
                 const res = await fetch(`${API}/api/video/share/${vid}`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                    // headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -127,16 +127,16 @@ function VideoPage() {
 
     const handlePrivacyChange = async (newIsPublic) => {
         try {
-            const res = await fetch(`${API}/api/video/${vid}/privacy`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ isPublic: newIsPublic }),
-            });
+            // const res = await fetch(`${API}/api/video/${vid}/privacy`, {
+            //     method: "PATCH",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+            //     },
+            //     body: JSON.stringify({ isPublic: newIsPublic }),
+            // });
 
-            const data = await res.json();
+            // const data = await res.json();
             if (res.ok) {
                 setIsPublic(newIsPublic);
                 if (newIsPublic) {
