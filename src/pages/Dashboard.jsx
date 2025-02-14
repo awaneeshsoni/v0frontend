@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
-const API = import.meta.env.VITE_API_URL
+const API = import.meta.env.VITE_API_URL;
 
 function Dashboard() {
   const [workspaces, setWorkspaces] = useState([]);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-
 
   useEffect(() => {
     const fetchWorkspaces = async () => {
@@ -27,16 +25,18 @@ function Dashboard() {
   }, []);
 
   const placeholderWorkspaces = [
-    { _id: "1", name: "Example Workspace 1" },
-    { _id: "2", name: "Example Workspace 2" },
+    { _id: "1", name: "Example Workspace 1", icon: "📂" },
+    { _id: "2", name: "Example Workspace 2", icon: "🚀" },
   ];
 
   return (
-    <>
-      <Navbar />
-      <div className="p-10">
+    <div className="p-8 min-h-screen bg-gray-900 text-white">
+      {/* Top bar with Flame logo (left) and create button (right) */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-4xl font-bold">Your Workspaces</h2>
+        <div className="flex items-center space-x-2 text-3xl font-bold">
+          <span>🔥</span>
+          <h2>Flame</h2>
+        </div>
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           onClick={() => setShowModal(true)}
@@ -44,20 +44,26 @@ function Dashboard() {
           + Create Workspace
         </button>
       </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[...placeholderWorkspaces, ...workspaces].map((ws) => (
-            <div
-              key={ws._id}
-              className="p-6 border rounded-xl shadow-lg cursor-pointer bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105 flex items-center justify-center"
-              onClick={() => navigate(`/workspace/${ws._id}`)}
-            >
-              <h3 className="text-lg font-medium">{ws.name}</h3>
-            </div>
-          ))}
-        </div>
-        {showModal && <CreateWorkspaceModal setShowModal={setShowModal} setWorkspaces={setWorkspaces} />}
+
+      {/* "Your Workspaces" heading */}
+      <h2 className="text-lg font-semibold mb-3 px- py-3">Your Workspaces</h2>
+
+      {/* Workspace grid (smaller & compact cards) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {[...workspaces].map((ws) => (
+          <div
+            key={ws._id}
+            className="bg-gray-800 rounded-lg shadow-md p-4 flex flex-col items-center justify-center cursor-pointer transition transform hover:scale-105 hover:bg-gray-700 aspect-square w-60"
+            onClick={() => navigate(`/workspace/${ws._id}`)}
+          >
+            <div className="text-5xl mb-1">{ws.icon || "📁"}</div>
+            <h3 className="text-1xl font-medium text-white text-center">{ws.name}</h3>
+          </div>
+        ))}
       </div>
-    </>
+
+      {showModal && <CreateWorkspaceModal setShowModal={setShowModal} setWorkspaces={setWorkspaces} />}
+    </div>
   );
 }
 

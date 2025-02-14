@@ -1,5 +1,5 @@
 import { useState } from "react";
-const API = import.meta.env.VITE_API_URL
+const API = import.meta.env.VITE_API_URL;
 
 function UploadVideoModal({ wsid, onClose, setVideos }) {
   const [videoFile, setVideoFile] = useState(null);
@@ -46,27 +46,37 @@ function UploadVideoModal({ wsid, onClose, setVideos }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <div className="bg-[#1e293b] p-6 rounded-lg shadow-lg w-96 text-white">
         <h2 className="text-xl font-bold mb-4">Upload Video</h2>
 
-        <input type="file" accept="video/*" onChange={handleFileChange} className="mb-4 w-full" />
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        <input
+          type="file"
+          accept="video/*"
+          onChange={handleFileChange}
+          className="mb-4 w-full bg-[#0f172a] text-black border border-gray-600 rounded p-2"
+        />
+        {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
 
         {uploading && (
-          <div className="relative w-full bg-gray-200 rounded h-3 overflow-hidden">
+          <div className="relative w-full bg-gray-600 rounded h-3 overflow-hidden">
             <div
-              className="bg-blue-500 h-3 transition-all"
+              className="bg-white h-3 transition-all"
               style={{ width: `${progress}%` }}
             />
           </div>
         )}
 
         <div className="flex justify-end mt-4 space-x-2">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-300 disabled:bg-gray-400"
           >
             {uploading ? "Uploading..." : "Upload"}
           </button>

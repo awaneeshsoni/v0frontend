@@ -14,8 +14,8 @@ const AppRoutes = () => {
     { path: '/signup', element: <Signup /> },
     { path: '/dashboard', element: <Dashboard /> },
     { path: '/workspace/:wsid', element: <Workspace /> },
-    { path: '/workspace/:wsid/video/:vid', element: <VideoPage /> },
-    { path: '/video/:id', element: <VideoReview /> },
+    { path: '/workspace/:wsid/video/:vid', element: <VideoReview /> },
+    { path: '/video/:id', element: <VideoPage /> },
     // Add more routes as needed
   ]);
   return routes;

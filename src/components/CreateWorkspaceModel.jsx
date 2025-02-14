@@ -1,5 +1,5 @@
 import { useState } from "react";
-const API = import.meta.env.VITE_API_URL
+const API = import.meta.env.VITE_API_URL;
 
 function CreateWorkspaceModal({ setShowModal, setWorkspaces }) {
   const [name, setName] = useState("");
@@ -39,30 +39,30 @@ function CreateWorkspaceModal({ setShowModal, setWorkspaces }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <div className="bg-[#1e293b] p-6 rounded-lg shadow-lg w-96 text-white">
         <h2 className="text-2xl font-bold mb-4">Create Workspace</h2>
-        
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-        
+
+        {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
+
         <input
           type="text"
           placeholder="Workspace Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-2 border border-gray-600 rounded mb-4 bg-[#0f172a] text-black placeholder-gray-400"
         />
 
         <div className="flex justify-end gap-2">
           <button
-            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
             onClick={() => setShowModal(false)}
             disabled={loading}
           >
             Cancel
           </button>
-          
+
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center"
+            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-300 flex items-center"
             onClick={handleCreate}
             disabled={loading}
           >
