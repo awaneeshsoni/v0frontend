@@ -184,7 +184,7 @@ function VideoPage() {
 
             {/* Mobile Navbar */}
             <nav className="md:hidden flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
-                <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="text-white">
+                {/* <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="text-white">
                     <svg
                         className="h-6 w-6"
                         fill="none"
@@ -195,32 +195,30 @@ function VideoPage() {
                         stroke="currentColor"
                     >
                         <path d="M4 6h16M4 12h16m-7 6h7"></path> {/* Hamburger for left */}
-                    </svg>
-                </button>
-                <div className="flex items-center space-x-2 text-xl font-bold">
-                    <span>🔥</span>
-                    <h2>Flame</h2>
-                </div>
-                <div className="w-full flex justify-end items-center">
-                    <select
-                        value={isPublic ? "public" : "private"}
-                        onChange={(e) => handlePrivacyChange(e.target.value === "public")}
-                        className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
-                        disabled={isPublic === null}
-                    >
-                        <option value="" disabled>Loading...</option>
-                        <option value="public">Public</option>
-                        <option value="private">Private</option>
-                    </select>
-                    <button
-                        className={`px-4 py-2 rounded ${isPublic ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500 cursor-not-allowed"
-                            }`}
-                        onClick={handleShare}
-                        disabled={!isPublic}
-                    >
-                        Share
-                    </button>
-                </div>
+                    {/* </svg>
+                </button> } */}
+                <><div className="flex items-center space-x-2 text-xl font-bold">
+    <span>🔥</span>
+    <h2>Flame</h2>
+</div><div className="w-full flex justify-end items-center">
+        <select
+            value={isPublic ? "public" : "private"}
+            onChange={(e) => handlePrivacyChange(e.target.value === "public")}
+            className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
+            disabled={isPublic === null}
+        >
+            <option value="" disabled>Loading...</option>
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+        </select>
+        <button
+            className={`px-4 py-2 rounded ${isPublic ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500 cursor-not-allowed"}`}
+            onClick={handleShare}
+            disabled={!isPublic}
+        >
+            Share
+        </button>
+    </div></>
             </nav>
 
             {/* Combined Sidebar (Mobile) */}
