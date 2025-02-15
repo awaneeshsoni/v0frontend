@@ -24,7 +24,7 @@ function VideoPage() {
                 setIsLoading(false);
             } catch (err) {
                 console.error("Error fetching video:", err);
-                setError("Failed to load video.");
+                setError("Failed to load video. Maybe the video is private or server error!");
                 setIsLoading(false);
             }
         };
@@ -42,38 +42,34 @@ function VideoPage() {
             return;
         }
 
-        setError("");
-        const timestamp = videoRef.current?.currentTime?.toFixed(2) || "0.00";
+        setError(""); // Clear previous errors
+        const timestamp = videoRef.current.currentTime.toFixed(2); // Ensure timestamp is captured
 
         const newComment = { name, text: commentText, timestamp };
 
         try {
             const res = await fetch(`${API}/api/video/${id}/comments`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`, // If required
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newComment),
             });
 
-            if (!res.ok) throw new Error("Failed to add comment");
-
             const data = await res.json();
-            setComments((prev) => [...prev, data]);
-            setCommentText("");
-            setName(localStorage.getItem("username") || ""); // Reset name if not stored
+            console.log("New comment response:", data);
 
-            videoRef.current?.play(); // Resume playback
+            if (res.ok) {
+                setComments([...comments, newComment]); // Ensure new comment is added properly
+                setCommentText(""); // Clear input
+                videoRef.current.play(); // Resume video
+            }
         } catch (err) {
             console.error("Error adding comment:", err);
-            setError(err.message || "Failed to add comment");
         }
     };
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0f172a] text-white">
-             {/* Mobile Navbar */}
+            {/* Mobile Navbar */}
             <nav className="md:hidden flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
                 <div className="flex items-center space-x-2 text-xl font-bold">
                     <span>🔥</span>
@@ -114,14 +110,16 @@ function VideoPage() {
                             {error && <p className="text-red-500 mb-2">{error}</p>}
 
                             {/* Name Input */}
-                            {!localStorage.getItem("username") && (
-                                <input
-                                    type="text"
-                                    placeholder="Your Name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white placeholder-gray-400"
-                                />
+                            {(
+                                <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
+                                    <span className="mr-2 opacity-50">Name:</span>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="bg-transparent border-none outline-none flex-1 text-white"
+                                    />
+                                </div>
                             )}
 
                             {/* Comments List */}
@@ -134,8 +132,12 @@ function VideoPage() {
                                             key={index}
                                             className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
                                             onClick={() => {
-                                                if (c.timestamp !== undefined) {
+                                                if (videoRef?.current) {
+                                                    console.log("Setting time to:", c.timestamp);
                                                     videoRef.current.currentTime = parseFloat(c.timestamp);
+                                                    // videoRef.current.play(); // Optional: Auto-play after seeking
+                                                } else {
+                                                    console.error("VideoRef is null");
                                                 }
                                             }}
                                         >
@@ -154,7 +156,11 @@ function VideoPage() {
                                 <textarea
                                     placeholder="Add a comment..."
                                     value={commentText}
-                                    onFocus={() => videoRef.current?.pause()}
+                                    onFocus={() => {
+                                        if (videoRef.current) {
+                                            videoRef.current.pause();
+                                        }
+                                    }}
                                     onChange={(e) => setCommentText(e.target.value)}
                                     className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
                                 />
@@ -170,15 +176,13 @@ function VideoPage() {
                 </div>
             </div>
 
-               {/* Mobile Main Content and Comments  */}
+            {/* Mobile Main Content and Comments  */}
             <div className="md:hidden flex-1 p-4">
-               
-
                 <h2 className="text-2xl font-bold mb-2 truncate"> {/* Added truncate here */}
                     {video ? video.title : "Loading..."}
                 </h2>
 
-                 {/* Video Section - Mobile */}
+                {/* Video Section - Mobile */}
                 <div className="mb-4">
                     {isLoading ? (
                         <div className="w-full aspect-video flex items-center justify-center bg-gray-800">
@@ -193,67 +197,69 @@ function VideoPage() {
 
                 {/* Comments Section - Mobile */}
                 <div className="bg-[#1e293b] p-4 rounded-lg shadow flex flex-col">
-                        <h3 className="text-xl font-bold mb-3">Comments</h3>
-                        <h5 className="text-sm mb-3">
+                    <h3 className="text-xl font-bold mb-3">Comments</h3>
+                    <h5 className="text-sm mb-3">
                         Click a comment to jump to that moment
-                        </h5>
+                    </h5>
 
-                        {/* Error Message */}
-                        {error && <p className="text-red-500 mb-2">{error}</p>}
+                    {/* Error Message */}
+                    {error && <p className="text-red-500 mb-2">{error}</p>}
 
-                        {/* Name Input */}
-                        {!localStorage.getItem("username") && (
+                    {/* Name Input */}
+                    {(
+                        <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
+                            <span className="mr-2 opacity-50">Name:</span>
                             <input
                                 type="text"
-                                placeholder="Your Name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white placeholder-gray-400"
+                                className="bg-transparent border-none outline-none flex-1 text-white"
                             />
+                        </div>
+                    )}
+
+                    {/* Comments List (Scrollable) */}
+                    <div className="flex-1 overflow-y-auto max-h-[50vh]">
+                        {comments.length === 0 ? (
+                            <p className="text-gray-400 text-center">No comments yet.</p>
+                        ) : (
+                            comments.map((c, index) => (
+                                <div
+                                    key={index}
+                                    className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
+                                    onClick={() => {
+                                        if (c.timestamp !== undefined) {
+                                            videoRef.current.currentTime = parseFloat(c.timestamp);
+                                        }
+                                    }}
+                                >
+                                    <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
+                                    <p className="text-white">{c.text || "No comment text"}</p>
+                                    <p className="text-xs text-gray-400">
+                                        ⏳ {c.timestamp !== undefined ? `${parseFloat(c.timestamp).toFixed(2)}s` : "No timestamp"}
+                                    </p>
+                                </div>
+                            ))
                         )}
-
-                        {/* Comments List (Scrollable) */}
-                        <div className="flex-1 overflow-y-auto">
-                            {comments.length === 0 ? (
-                                    <p className="text-gray-400 text-center">No comments yet.</p>
-                                ) : (
-                                    comments.map((c, index) => (
-                                        <div
-                                            key={index}
-                                            className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
-                                            onClick={() => {
-                                                if (c.timestamp !== undefined) {
-                                                    videoRef.current.currentTime = parseFloat(c.timestamp);
-                                                }
-                                            }}
-                                        >
-                                            <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
-                                            <p className="text-white">{c.text || "No comment text"}</p>
-                                            <p className="text-xs text-gray-400">
-                                                ⏳ {c.timestamp !== undefined ? `${parseFloat(c.timestamp).toFixed(2)}s` : "No timestamp"}
-                                            </p>
-                                        </div>
-                                    ))
-                            )}
-                        </div>
-
-                        {/* Comment Input and Button (Fixed at Bottom) */}
-                        <div className="mt-auto">
-                            <textarea
-                                placeholder="Add a comment..."
-                                value={commentText}
-                                onFocus={() => videoRef.current?.pause()}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
-                            />
-                            <button
-                                className="w-full bg-blue-500 text-white py-2 rounded mt-2"
-                                onClick={handleAddComment}
-                            >
-                                Add Comment
-                            </button>
-                        </div>
                     </div>
+
+                    {/* Comment Input and Button (Fixed at Bottom) */}
+                    <div className="mt-auto">
+                        <textarea
+                            placeholder="Add a comment..."
+                            value={commentText}
+                            onFocus={() => videoRef.current?.pause()}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
+                        />
+                        <button
+                            className="w-full bg-blue-500 text-white py-2 rounded mt-2"
+                            onClick={handleAddComment}
+                        >
+                            Add Comment
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div>

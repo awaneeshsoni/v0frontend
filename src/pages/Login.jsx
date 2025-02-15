@@ -26,6 +26,7 @@ function Login() {
       if (!res.ok) throw new Error(data.message || "Login failed");
 
       localStorage.setItem("token", data.token); // Store auth token
+      localStorage.setItem("username", data.username); // Store auth token
 
       // Fetch user's workspaces after login
       const workspaceRes = await fetch(`${API}/api/workspace`, {

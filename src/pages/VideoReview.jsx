@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
 const API = import.meta.env.VITE_API_URL;
 
 function VideoPage() {
@@ -18,7 +19,7 @@ function VideoPage() {
     const navigate = useNavigate();
     const [showLeftSidebar, setShowLeftSidebar] = useState(false);
     const sidebarRef = useRef(null);
-
+    const [CreateWorkspace, setCreateWorkspace] = useState(false)
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
@@ -26,12 +27,10 @@ function VideoPage() {
                 const res = await fetch(`${API}/api/workspace`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
-
                 if (!res.ok) {
                     const errorData = await res.json();
                     throw new Error(errorData.message || "Failed to fetch workspaces");
                 }
-
                 const data = await res.json();
                 setWorkspaces(data);
             } catch (err) {
@@ -46,8 +45,8 @@ function VideoPage() {
     useEffect(() => {
         const fetchVideo = async () => {
             try {
-                const res = await fetch(`${API}/api/video/share/${vid}`, {
-                    // headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                const res = await fetch(`${API}/api/video/${vid}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -55,9 +54,8 @@ function VideoPage() {
                     setComments(data.comments || []);
                     setIsPublic(data.isPublic);
                     if (data.isPublic) {
-                        setShareUrl(`${window.location.origin}/video/share/${data.shareId}`);
+                        setShareUrl(`${window.location.origin}/video/${data._id}`);
                     }
-
                     // Fetch workspace name.  Crucially, use workspaceId, not workspace
                     if (data.workspace) { // Corrected: Check for data.workspace
                         const workspaceRes = await fetch(`${API}/api/workspace/${data.workspace}`, { // Corrected: data.workspace
@@ -82,93 +80,83 @@ function VideoPage() {
         fetchVideo();
     }, [vid]);
 
-      useEffect(() => {
+    useEffect(() => {
         // Function to handle clicks outside the sidebar
         const handleClickOutside = (event) => {
-          if (sidebarRef.current && !sidebarRef.current.contains(event.target) && showLeftSidebar) {
-            setShowLeftSidebar(false);
-          }
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target) && showLeftSidebar) {
+                setShowLeftSidebar(false);
+            }
         };
-    
         // Add event listener when the sidebar is open
         if (showLeftSidebar) {
-          document.addEventListener("mousedown", handleClickOutside);
+            document.addEventListener("mousedown", handleClickOutside);
         }
-    
+
         // Clean up the event listener
         return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
-      }, [showLeftSidebar]); // Only re-run if showLeftSidebar changes
+    }, [showLeftSidebar]); // Only re-run if showLeftSidebar changes
 
-    const handleAddComment = async () => {
-        if (!name.trim()) {
-            setError("Please enter your name.");
-            return;
-        }
-        if (!commentText.trim()) {
-            setError("Comment cannot be empty.");
-            return;
-        }
+     const handleAddComment = async () => {
+    if (!name.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
+    if (!commentText.trim()) {
+      setError("Comment cannot be empty.");
+      return;
+    }
 
-        setError("");
-        const timestamp = videoRef.current.currentTime.toFixed(2);
+    setError(""); // Clear previous errors
+    const timestamp = videoRef.current.currentTime.toFixed(2); // Ensure timestamp is captured
 
-        // Correctly use the 'name' from the state
-        const newComment = { name: name, text: commentText, timestamp };
+    const newComment = { name, text: commentText, timestamp };
 
-        try {
-            const res = await fetch(`${API}/api/video/${vid}/comments`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify(newComment),
-            });
+    try {
+      const res = await fetch(`${API}/api/video/${vid}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newComment),
+      });
 
-            const data = await res.json();
+      const data = await res.json();
+      console.log("New comment response:", data);
 
-            if (res.ok) {
-                // VERY IMPORTANT: Use the returned comment data (data) from the server.
-                setComments(prevComments => [...(prevComments || []), data]);
-                setCommentText("");
-                // Reset name to localStorage value (or empty string) after adding comment
-                setName(localStorage.getItem("username") || "");
-                videoRef.current.play();
-            } else {
-                throw new Error(data.message || 'Failed to add comment');
-            }
-        } catch (err) {
-            console.error("Error adding comment:", err);
-            setError(err.message || "Failed to add comment");
-        }
-    };
+      if (res.ok) {
+        setComments([...comments, newComment]); // Ensure new comment is added properly
+        setCommentText(""); // Clear input
+        videoRef.current.play(); // Resume video
+      }
+    } catch (err) {
+      console.error("Error adding comment:", err);
+    }
+  };
 
 
 
     const handlePrivacyChange = async (newIsPublic) => {
         try {
-            // const res = await fetch(`${API}/api/video/${vid}/privacy`, {
-            //     method: "PATCH",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-            //     },
-            //     body: JSON.stringify({ isPublic: newIsPublic }),
-            // });
-
-            // const data = await res.json();
+            const res = await fetch(`${API}/api/video/${vid}/privacy`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ isPublic: newIsPublic }),
+            });
+            const data = await res.json();
             if (res.ok) {
                 setIsPublic(newIsPublic);
                 if (newIsPublic) {
-                    setShareUrl(`${window.location.origin}/video/share/${data.shareId}`);
+                    setShareUrl(`${window.location.origin}/video/${data.id}`);
                 } else {
                     setShareUrl("");
                 }
             } else {
                 throw new Error(data.message || "Failed to update privacy setting");
             }
+
         } catch (err) {
             console.error("Error changing privacy:", err);
             setError(err.message || "Failed to change privacy settings.");
@@ -176,8 +164,8 @@ function VideoPage() {
     };
 
     const handleShare = () => {
-        if (isPublic && shareUrl) {
-            navigator.clipboard.writeText(shareUrl)
+        if (isPublic) {
+            navigator.clipboard.writeText(shareUrl) // Use `navigator`, not `navigate`
                 .then(() => {
                     alert("Share URL copied to clipboard!");
                 })
@@ -185,6 +173,8 @@ function VideoPage() {
                     console.error("Failed to copy:", err);
                     alert("Failed to copy URL. Please copy manually.");
                 });
+        } else {
+            alert("This video is private and cannot be shared.");
         }
     };
 
@@ -195,25 +185,25 @@ function VideoPage() {
             {/* Mobile Navbar */}
             <nav className="md:hidden flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
                 <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="text-white">
-                <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path d="M4 6h16M4 12h16m-7 6h7"></path> {/* Hamburger for left */}
-                </svg>
+                    <svg
+                        className="h-6 w-6"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path d="M4 6h16M4 12h16m-7 6h7"></path> {/* Hamburger for left */}
+                    </svg>
                 </button>
                 <div className="flex items-center space-x-2 text-xl font-bold">
                     <span>🔥</span>
                     <h2>Flame</h2>
                 </div>
-                 <div className="w-full flex justify-end items-center">
+                <div className="w-full flex justify-end items-center">
                     <select
-                        value={isPublic === null ? "" : (isPublic ? "public" : "private")}
+                        value={isPublic ? "public" : "private"}
                         onChange={(e) => handlePrivacyChange(e.target.value === "public")}
                         className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
                         disabled={isPublic === null}
@@ -233,35 +223,35 @@ function VideoPage() {
                 </div>
             </nav>
 
-              {/* Combined Sidebar (Mobile) */}
+            {/* Combined Sidebar (Mobile) */}
             {showLeftSidebar && (
                 <div ref={sidebarRef} className="md:hidden absolute left-0 top-[60px] bg-[#1e293b] w-full z-40">
-                <h3 className="text-lg font-semibold p-4">Workspaces</h3>
-                <div className="p-4 space-y-2">
-                    {workspaces.map((ws) => (
-                    <button
-                        key={ws._id}
-                        className={`w-full text-left px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600`}
-                        onClick={() => { navigate(`/workspace/${ws._id}`); setShowLeftSidebar(false);}}
-                    >
-                        {ws.name}
-                    </button>
-                    ))}
-                </div>
-                <div className="p-4">
-                    <button
-                    className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
-                    onClick={() => {navigate("/create-workspace"); setShowLeftSidebar(false)}}
-                    >
-                        Create New Workspace
-                    </button>
-                 </div>
+                    <h3 className="text-lg font-semibold p-4">Workspaces</h3>
+                    <div className="p-4 space-y-2">
+                        {workspaces.map((ws) => (
+                            <button
+                                key={ws._id}
+                                className={`w-full text-left px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600`}
+                                onClick={() => { navigate(`/workspace/${ws._id}`); setShowLeftSidebar(false); }}
+                            >
+                                {ws.name}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="p-4">
+                        <button
+                            className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
+                            onClick={setCreateWorkspace(true) }
+                        >
+                            Create New Workspace
+                        </button>
+                    </div>
                 </div>
             )}
 
 
             {/* Desktop Layout */}
-           <div className="hidden md:flex flex-row h-full">
+            <div className="hidden md:flex flex-row h-full">
                 {/* Left Sidebar (Workspace List) */}
                 <div className="w-64 bg-[#1e293b] p-6 flex flex-col">
                     <h2 className="text-xl font-bold flex items-center gap-2">🔥 Flame</h2>
@@ -280,7 +270,7 @@ function VideoPage() {
                     <div className="mt-auto">
                         <button
                             className="w-full bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600"
-                            onClick={() => navigate("/create-workspace")}
+                            onClick={() => {setCreateWorkspace(true); setShowLeftSidebar(false)}}
                         >
                             Create New Workspace
                         </button>
@@ -347,15 +337,17 @@ function VideoPage() {
                             {error && <p className="text-red-500 mb-2">{error}</p>}
 
                             {/* Name Input */}
-                            {!localStorage.getItem("username") && (
-                                <input
-                                    type="text"
-                                    placeholder="Your Name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white placeholder-gray-400"
-                                />
-                            )}
+                            {
+                               <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
+                               <span className="mr-2 opacity-50">Name:</span>
+                               <input
+                                   type="text"
+                                   value={name}
+                                   onChange={(e) => setName(e.target.value)}
+                                   className="bg-transparent border-none outline-none flex-1 text-white"
+                               />
+                           </div>
+                            }
 
                             {/* Comments List (Scrollable) */}
                             <div className="flex-1 overflow-y-auto">
@@ -406,24 +398,21 @@ function VideoPage() {
                         </div>
                     </div>
                 </div>
-           </div>
-        
+            </div>
 
-             {/* Mobile Main Content and Comments  */}
+
+            {/* Mobile Main Content and Comments  */}
             <div className="md:hidden flex-1 p-4">
-                 {/* Top Bar (Privacy and Share) - Mobile */}
-                 
-
                 <h2 className="text-2xl font-bold mb-2">
                     {selectedWorkspaceName && (
                         <span className="text-lg font-semibold text-gray-400 mr-2">
-                        {selectedWorkspaceName} /
+                            {selectedWorkspaceName}
                         </span>
                     )}
                     {video ? video.title : "Loading..."}
                 </h2>
 
-                 {/* Video Section - Mobile */}
+                {/* Video Section - Mobile */}
                 <div className="mb-4">
                     {isLoading ? (
                         <div className="w-full aspect-video flex items-center justify-center bg-gray-800">
@@ -437,74 +426,78 @@ function VideoPage() {
                 </div>
 
                 {/* Comments Section - Mobile */}
-                <div className="bg-[#1e293b] p-4 rounded-lg shadow flex flex-col">
-                        <h3 className="text-xl font-bold mb-3">Comments</h3>
-                        <h5 className="text-sm mb-3">
-                            Click the comment to see the frame the comment was related to
-                        </h5>
+                <div className="bg-[#1e293b] overflow-y-auto p-4 rounded-lg shadow flex flex-col">
+                    <h5 className="text-xl font-bold mb-3">Comments</h5>
+                    {/* <h5 className="text-sm mb-3">
+                        Click the comment to see the frame the comment was related to
+                    </h5> */}
 
-                        {/* Error Message */}
-                        {error && <p className="text-red-500 mb-2">{error}</p>}
+                    {/* Error Message */}
+                    {error && <p className="text-red-500 mb-2">{error}</p>}
 
-                        {/* Name Input */}
-                        {!localStorage.getItem("username") && (
-                            <input
-                                type="text"
-                                placeholder="Your Name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white placeholder-gray-400"
-                            />
-                        )}
-
-                        {/* Comments List (Scrollable) */}
-                        <div className="flex-1 overflow-y-auto">
-                            {comments === null ? (
-                                <div className="flex justify-center">
-                                    <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-8 h-8"></div>
-                                </div>
-                            ) : (
-                                comments.map((c, index) => (
-                                    <div
-                                        key={index}
-                                        className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
-                                        onClick={() => {
-                                            if (c.timestamp !== undefined) {
-                                                videoRef.current.currentTime = parseFloat(c.timestamp);
-                                            }
-                                        }}
-                                    >
-                                        <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
-                                        <p className="text-white">{c.text || "No comment text"}</p>
-                                        <p className="text-xs text-gray-400">
-                                            ⏳{" "}
-                                            {c.timestamp !== undefined
-                                                ? parseFloat(c.timestamp).toFixed(2) + "s"
-                                                : "No timestamp"}
-                                        </p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        {/* Comment Input and Button (Fixed at Bottom) */}
-                        <div className="mt-auto">
-                            <textarea
-                                placeholder="Add a comment..."
-                                value={commentText}
-                                onFocus={() => videoRef.current.pause()}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
-                            />
-                            <button
-                                className="w-full bg-blue-500 text-white py-2 rounded mt-2"
-                                onClick={handleAddComment}
-                            >
-                                Add Comment
-                            </button>
-                        </div>
+                    {/* Name Input */}
+                    {(
+                        <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
+                        <span className="mr-2 opacity-50">Name:</span>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-transparent border-none outline-none flex-1 text-white"
+                        />
                     </div>
+                    )}
+
+                    {/* Comments List (Scrollable) */}
+                    <div className="flex-1 overflow-y-auto max-h-[50vh]">
+                        {comments === null ? (
+                            <div className="flex justify-center">
+                                <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-8 h-8"></div>
+                            </div>
+                        ) : (
+                            comments.map((c, index) => (
+                                <div
+                                    key={index}
+                                    className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
+                                    onClick={() => {
+                                        if (c.timestamp !== undefined) {
+                                            videoRef.current.currentTime = parseFloat(c.timestamp);
+                                        }
+                                    }}
+                                >
+                                    <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
+                                    <p className="text-white">{c.text || "No comment text"}</p>
+                                    <p className="text-xs text-gray-400">
+                                        ⏳{" "}
+                                        {c.timestamp !== undefined
+                                            ? parseFloat(c.timestamp).toFixed(2) + "s"
+                                            : "No timestamp"}
+                                    </p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Comment Input and Button (Fixed at Bottom) */}
+                    <div className="mt-auto">
+                        <textarea
+                            placeholder="Add a comment..."
+                            value={commentText}
+                            onFocus={() => videoRef.current.pause()}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
+                        />
+                        <button
+                            className="w-full bg-blue-500 text-white py-2 rounded mt-2"
+                            onClick={handleAddComment}
+                        >
+                            Add Comment
+                        </button>
+                    </div>
+                </div>
             </div>
+            {CreateWorkspace && ( <CreateWorkspaceModal setShowModal={setCreateWorkspace} setWorkspaces={setWorkspaces} />
+      )}
 
         </div>
     );
