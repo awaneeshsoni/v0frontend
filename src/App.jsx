@@ -6,10 +6,11 @@ import Dashboard from './pages/Dashboard';
 import Workspace from './pages/Workspace';
 import VideoPage from './pages/VideoPage';
 import VideoReview from './pages/VideoReview';
+import Home from './pages/Home';
 
 const AppRoutes = () => {
   const routes = useRoutes([
-    { path: '/', element: <Login /> },
+    { path: '/', element: <Home /> },
     { path: '/login', element: <Login /> },
     { path: '/signup', element: <Signup /> },
     { path: '/dashboard', element: <Dashboard /> },

@@ -1,29 +1,15 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import logo from "../vite.svg"
 
 function Navbar() {
-  const navLinkClass = ({ isActive }) =>
-    isActive
-      ? 'text-blue-700 font-bold'
-      : 'text-gray-500 hover:text-blue-700';
-
   return (
-    <nav className="bg-white shadow">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="text-2xl font-medium text-blue-500">LOGO</div>
-        <div className="space-x-8">
-          <NavLink to="/" className={navLinkClass}>
-            Home
-          </NavLink>
-          <NavLink to="/about" className={navLinkClass}>
-            About
-          </NavLink>
-          <NavLink to="/contact" className={navLinkClass}>
-            Contact Us
-          </NavLink>
-        </div>
+    <div className="py-4 px-4 text-center md:text-left md:flex md:items-center md:justify-between max-w-7xl mx-auto">
+        <Link to="/" className="flex items-center text-white text-2xl font-bold">
+          <span>🔥</span>
+            Flame
+        </Link>
       </div>
-    </nav>
   );
 }
 

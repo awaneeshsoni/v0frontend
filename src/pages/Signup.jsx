@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -35,6 +37,8 @@ function Signup() {
   };
 
   return (
+    <div className="bg-[#0f172a]">
+      <Navbar />
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f172a] text-white p-4"> {/* Added padding */}
       <h2 className="text-2xl font-bold mb-4">Create an Account</h2>
       {error && <p className="text-red-500">{error}</p>}
@@ -85,6 +89,8 @@ function Signup() {
           Login
         </Link>
       </p>
+    </div>
+    <Footer />
     </div>
   );
 }

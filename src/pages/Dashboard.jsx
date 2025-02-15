@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 const API = import.meta.env.VITE_API_URL;
 
 function Dashboard() {
@@ -30,13 +32,15 @@ function Dashboard() {
   ];
 
   return (
+    <div className="bg-blue-700">
+      <Navbar />
     <div className="p-8 min-h-screen bg-gray-900 text-white">
       {/* Top bar with Flame logo (left) and create button (right) */}
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-2 text-3xl font-bold">
+        {/* <div className="flex items-center space-x-2 text-3xl font-bold">
           <span>🔥</span>
           <h2>Flame</h2>
-        </div>
+        </div> */}
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           onClick={() => setShowModal(true)}
@@ -63,6 +67,8 @@ function Dashboard() {
       </div>
 
       {showModal && <CreateWorkspaceModal setShowModal={setShowModal} setWorkspaces={setWorkspaces} />}
+    </div>
+    <Footer />
     </div>
   );
 }

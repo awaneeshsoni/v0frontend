@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UploadVideoModal from "../components/UploadVideoModel";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
+import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -70,6 +72,7 @@ function Workspace() {
 
 
   return (
+    <div className="bg-[#0f172a] max-h-screen">
     <div className="flex min-h-screen flex-col bg-[#0f172a] text-white">
       {/* Mobile Navbar */}
       <nav className="md:hidden  flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
@@ -254,6 +257,8 @@ function Workspace() {
       {showUploadModal && (
         <UploadVideoModal wsid={wsid} onClose={() => setShowUploadModal(false)} setVideos={setVideos} />
       )}
+    </div>
+    <Footer />
     </div>
   );
 }

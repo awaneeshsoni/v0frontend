@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
+import Footer from "../components/Footer";
 const API = import.meta.env.VITE_API_URL;
 
 function VideoPage() {
@@ -98,40 +99,40 @@ function VideoPage() {
         };
     }, [showLeftSidebar]); // Only re-run if showLeftSidebar changes
 
-     const handleAddComment = async () => {
-    if (!name.trim()) {
-      setError("Please enter your name.");
-      return;
-    }
-    if (!commentText.trim()) {
-      setError("Comment cannot be empty.");
-      return;
-    }
+    const handleAddComment = async () => {
+        if (!name.trim()) {
+            setError("Please enter your name.");
+            return;
+        }
+        if (!commentText.trim()) {
+            setError("Comment cannot be empty.");
+            return;
+        }
 
-    setError(""); // Clear previous errors
-    const timestamp = videoRef.current.currentTime.toFixed(2); // Ensure timestamp is captured
+        setError(""); // Clear previous errors
+        const timestamp = videoRef.current.currentTime.toFixed(2); // Ensure timestamp is captured
 
-    const newComment = { name, text: commentText, timestamp };
+        const newComment = { name, text: commentText, timestamp };
 
-    try {
-      const res = await fetch(`${API}/api/video/${vid}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newComment),
-      });
+        try {
+            const res = await fetch(`${API}/api/video/${vid}/comments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newComment),
+            });
 
-      const data = await res.json();
-      console.log("New comment response:", data);
+            const data = await res.json();
+            console.log("New comment response:", data);
 
-      if (res.ok) {
-        setComments([...comments, newComment]); // Ensure new comment is added properly
-        setCommentText(""); // Clear input
-        videoRef.current.play(); // Resume video
-      }
-    } catch (err) {
-      console.error("Error adding comment:", err);
-    }
-  };
+            if (res.ok) {
+                setComments([...comments, newComment]); // Ensure new comment is added properly
+                setCommentText(""); // Clear input
+                videoRef.current.play(); // Resume video
+            }
+        } catch (err) {
+            console.error("Error adding comment:", err);
+        }
+    };
 
 
 
@@ -180,11 +181,12 @@ function VideoPage() {
 
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#0f172a] text-white">
+        <div>
+            <div className="flex flex-col min-h-screen bg-[#0f172a] text-white">
 
-            {/* Mobile Navbar */}
-            <nav className="md:hidden flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
-                {/* <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="text-white">
+                {/* Mobile Navbar */}
+                <nav className="md:hidden flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
+                    {/* <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="text-white">
                     <svg
                         className="h-6 w-6"
                         fill="none"
@@ -197,308 +199,310 @@ function VideoPage() {
                         <path d="M4 6h16M4 12h16m-7 6h7"></path> {/* Hamburger for left */}
                     {/* </svg>
                 </button> } */}
-                <><div className="flex items-center space-x-2 text-xl font-bold">
-    <span>🔥</span>
-    <h2>Flame</h2>
-</div><div className="w-full flex justify-end items-center">
-        <select
-            value={isPublic ? "public" : "private"}
-            onChange={(e) => handlePrivacyChange(e.target.value === "public")}
-            className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
-            disabled={isPublic === null}
-        >
-            <option value="" disabled>Loading...</option>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-        </select>
-        <button
-            className={`px-4 py-2 rounded ${isPublic ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500 cursor-not-allowed"}`}
-            onClick={handleShare}
-            disabled={!isPublic}
-        >
-            Share
-        </button>
-    </div></>
-            </nav>
-
-            {/* Combined Sidebar (Mobile) */}
-            {showLeftSidebar && (
-                <div ref={sidebarRef} className="md:hidden absolute left-0 top-[60px] bg-[#1e293b] w-full z-40">
-                    <h3 className="text-lg font-semibold p-4">Workspaces</h3>
-                    <div className="p-4 space-y-2">
-                        {workspaces.map((ws) => (
-                            <button
-                                key={ws._id}
-                                className={`w-full text-left px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600`}
-                                onClick={() => { navigate(`/workspace/${ws._id}`); setShowLeftSidebar(false); }}
+                    <><div className="flex items-center space-x-2 text-xl font-bold">
+                        <span>🔥</span>
+                        <h2>Flame</h2>
+                    </div><div className="w-full flex justify-end items-center">
+                            <select
+                                value={isPublic ? "public" : "private"}
+                                onChange={(e) => handlePrivacyChange(e.target.value === "public")}
+                                className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
+                                disabled={isPublic === null}
                             >
-                                {ws.name}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="p-4">
-                        <button
-                            className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
-                            onClick={setCreateWorkspace(true) }
-                        >
-                            Create New Workspace
-                        </button>
-                    </div>
-                </div>
-            )}
-
-
-            {/* Desktop Layout */}
-            <div className="hidden md:flex flex-row h-full">
-                {/* Left Sidebar (Workspace List) */}
-                <div className="w-64 bg-[#1e293b] p-6 flex flex-col">
-                    <h2 className="text-xl font-bold flex items-center gap-2">🔥 Flame</h2>
-                    <h3 className="text-lg font-semibold mt-6">Workspaces</h3>
-                    <div className="mt-4 space-y-2 overflow-y-auto flex-grow">
-                        {workspaces.map((workspace) => (
+                                <option value="" disabled>Loading...</option>
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                            </select>
                             <button
-                                key={workspace._id}
-                                className={`w-full text-left px-4 py-2 rounded-lg  bg-gray-600 hover:bg-gray-500`}
-                                onClick={() => navigate(`/workspace/${workspace._id}`)}
+                                className={`px-4 py-2 rounded ${isPublic ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500 cursor-not-allowed"}`}
+                                onClick={handleShare}
+                                disabled={!isPublic}
                             >
-                                {workspace.name}
+                                Share
                             </button>
-                        ))}
-                    </div>
-                    <div className="mt-auto">
-                        <button
-                            className="w-full bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600"
-                            onClick={() => {setCreateWorkspace(true); setShowLeftSidebar(false)}}
-                        >
-                            Create New Workspace
-                        </button>
-                    </div>
-                </div>
+                        </div></>
+                </nav>
 
-                {/* Main Content Area */}
-                <div className="flex-1 p-6 flex flex-col">
-                    {/* Top Bar (Privacy and Share) */}
-                    <div className="w-full flex justify-end items-center mb-4">
-                        <select
-                            value={isPublic === null ? "" : (isPublic ? "public" : "private")}
-                            onChange={(e) => handlePrivacyChange(e.target.value === "public")}
-                            className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
-                            disabled={isPublic === null}
-                        >
-                            <option value="" disabled>Loading...</option>
-                            <option value="public">Public</option>
-                            <option value="private">Private</option>
-                        </select>
-                        <button
-                            className={`px-4 py-2 rounded ${isPublic ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500 cursor-not-allowed"
-                                }`}
-                            onClick={handleShare}
-                            disabled={!isPublic}
-                        >
-                            Share
-                        </button>
-                    </div>
-
-                    {/* Video and Comments Section */}
-                    <div className="flex h-[80vh] flex-wrap md:flex-nowrap gap-6">
-                        {/* Video Section */}
-                        <div className="flex-1 flex flex-col">
-                            <h2 className="text-2xl font-bold mb-2">
-                                {selectedWorkspaceName && (
-                                    <span className="text-lg font-semibold text-gray-400 mr-2">
-                                        {selectedWorkspaceName} /
-                                    </span>
-                                )}
-                                {video ? video.title : "Loading..."}
-                            </h2>
-                            <div className="flex-1 overflow-hidden">
-                                {isLoading ? (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                                        <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-12 h-12"></div>
-                                    </div>
-                                ) : (
-                                    <video ref={videoRef} controls className="w-full h-full object-contain">
-                                        <source src={video?.url} type="video/mp4" />
-                                    </video>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Comments Section */}
-                        <div className="w-80 bg-[#1e293b] p-4 rounded-lg shadow flex flex-col">
-                            <h3 className="text-xl font-bold mb-3">Comments</h3>
-                            <h5 className="text-sm mb-3">
-                                Click the comment to see the frame the comment was related to
-                            </h5>
-
-                            {/* Error Message */}
-                            {error && <p className="text-red-500 mb-2">{error}</p>}
-
-                            {/* Name Input */}
-                            {
-                               <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
-                               <span className="mr-2 opacity-50">Name:</span>
-                               <input
-                                   type="text"
-                                   value={name}
-                                   onChange={(e) => setName(e.target.value)}
-                                   className="bg-transparent border-none outline-none flex-1 text-white"
-                               />
-                           </div>
-                            }
-
-                            {/* Comments List (Scrollable) */}
-                            <div className="flex-1 overflow-y-auto">
-                                {comments === null ? (
-                                    <div className="flex justify-center">
-                                        <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-8 h-8"></div>
-                                    </div>
-                                ) : (
-                                    comments.map((c, index) => (
-                                        <div
-                                            key={index}
-                                            className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
-                                            onClick={() => {
-                                                if (c.timestamp !== undefined) {
-                                                    videoRef.current.currentTime = parseFloat(c.timestamp);
-                                                }
-                                            }}
-                                        >
-                                            <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
-                                            <p className="text-white">{c.text || "No comment text"}</p>
-                                            <p className="text-xs text-gray-400">
-                                                ⏳{" "}
-                                                {c.timestamp !== undefined
-                                                    ? parseFloat(c.timestamp).toFixed(2) + "s"
-                                                    : "No timestamp"}
-                                            </p>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-
-                            {/* Comment Input and Button (Fixed at Bottom) */}
-                            <div className="mt-auto">
-                                <textarea
-                                    placeholder="Add a comment..."
-                                    value={commentText}
-                                    onFocus={() => videoRef.current.pause()}
-                                    onChange={(e) => setCommentText(e.target.value)}
-                                    className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
-                                />
+                {/* Combined Sidebar (Mobile) */}
+                {showLeftSidebar && (
+                    <div ref={sidebarRef} className="md:hidden absolute left-0 top-[60px] bg-[#1e293b] w-full z-40">
+                        <h3 className="text-lg font-semibold p-4">Workspaces</h3>
+                        <div className="p-4 space-y-2">
+                            {workspaces.map((ws) => (
                                 <button
-                                    className="w-full bg-blue-500 text-white py-2 rounded mt-2"
-                                    onClick={handleAddComment}
+                                    key={ws._id}
+                                    className={`w-full text-left px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600`}
+                                    onClick={() => { navigate(`/workspace/${ws._id}`); setShowLeftSidebar(false); }}
                                 >
-                                    Add Comment
+                                    {ws.name}
                                 </button>
+                            ))}
+                        </div>
+                        <div className="p-4">
+                            <button
+                                className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
+                                onClick={setCreateWorkspace(true)}
+                            >
+                                Create New Workspace
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+
+                {/* Desktop Layout */}
+                <div className="hidden md:flex flex-row h-full">
+                    {/* Left Sidebar (Workspace List) */}
+                    <div className="w-64 bg-[#1e293b] p-6 flex flex-col">
+                        <h2 className="text-xl font-bold flex items-center gap-2">🔥 Flame</h2>
+                        <h3 className="text-lg font-semibold mt-6">Workspaces</h3>
+                        <div className="mt-4 space-y-2 overflow-y-auto flex-grow">
+                            {workspaces.map((workspace) => (
+                                <button
+                                    key={workspace._id}
+                                    className={`w-full text-left px-4 py-2 rounded-lg  bg-gray-600 hover:bg-gray-500`}
+                                    onClick={() => navigate(`/workspace/${workspace._id}`)}
+                                >
+                                    {workspace.name}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="mt-auto">
+                            <button
+                                className="w-full bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600"
+                                onClick={() => { setCreateWorkspace(true); setShowLeftSidebar(false) }}
+                            >
+                                Create New Workspace
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 p-6 flex flex-col">
+                        {/* Top Bar (Privacy and Share) */}
+                        <div className="w-full flex justify-end items-center mb-4">
+                            <select
+                                value={isPublic === null ? "" : (isPublic ? "public" : "private")}
+                                onChange={(e) => handlePrivacyChange(e.target.value === "public")}
+                                className="bg-[#1e293b] text-white px-4 py-2 rounded mr-2"
+                                disabled={isPublic === null}
+                            >
+                                <option value="" disabled>Loading...</option>
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                            </select>
+                            <button
+                                className={`px-4 py-2 rounded ${isPublic ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-500 cursor-not-allowed"
+                                    }`}
+                                onClick={handleShare}
+                                disabled={!isPublic}
+                            >
+                                Share
+                            </button>
+                        </div>
+
+                        {/* Video and Comments Section */}
+                        <div className="flex h-[80vh] flex-wrap md:flex-nowrap gap-6">
+                            {/* Video Section */}
+                            <div className="flex-1 flex flex-col">
+                                <h2 className="text-2xl font-bold mb-2">
+                                    {selectedWorkspaceName && (
+                                        <span className="text-lg font-semibold text-gray-400 mr-2">
+                                            {selectedWorkspaceName} /
+                                        </span>
+                                    )}
+                                    {video ? video.title : "Loading..."}
+                                </h2>
+                                <div className="flex-1 overflow-hidden">
+                                    {isLoading ? (
+                                        <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                                            <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-12 h-12"></div>
+                                        </div>
+                                    ) : (
+                                        <video ref={videoRef} controls className="w-full h-full object-contain">
+                                            <source src={video?.url} type="video/mp4" />
+                                        </video>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Comments Section */}
+                            <div className="w-80 bg-[#1e293b] p-4 rounded-lg shadow flex flex-col">
+                                <h3 className="text-xl font-bold mb-3">Comments</h3>
+                                <h5 className="text-sm mb-3">
+                                    Click the comment to see the frame the comment was related to
+                                </h5>
+
+                                {/* Error Message */}
+                                {error && <p className="text-red-500 mb-2">{error}</p>}
+
+                                {/* Name Input */}
+                                {
+                                    <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
+                                        <span className="mr-2 opacity-50">Name:</span>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="bg-transparent border-none outline-none flex-1 text-white"
+                                        />
+                                    </div>
+                                }
+
+                                {/* Comments List (Scrollable) */}
+                                <div className="flex-1 overflow-y-auto">
+                                    {comments === null ? (
+                                        <div className="flex justify-center">
+                                            <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-8 h-8"></div>
+                                        </div>
+                                    ) : (
+                                        comments.map((c, index) => (
+                                            <div
+                                                key={index}
+                                                className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
+                                                onClick={() => {
+                                                    if (c.timestamp !== undefined) {
+                                                        videoRef.current.currentTime = parseFloat(c.timestamp);
+                                                    }
+                                                }}
+                                            >
+                                                <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
+                                                <p className="text-white">{c.text || "No comment text"}</p>
+                                                <p className="text-xs text-gray-400">
+                                                    ⏳{" "}
+                                                    {c.timestamp !== undefined
+                                                        ? parseFloat(c.timestamp).toFixed(2) + "s"
+                                                        : "No timestamp"}
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Comment Input and Button (Fixed at Bottom) */}
+                                <div className="mt-auto">
+                                    <textarea
+                                        placeholder="Add a comment..."
+                                        value={commentText}
+                                        onFocus={() => videoRef.current.pause()}
+                                        onChange={(e) => setCommentText(e.target.value)}
+                                        className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
+                                    />
+                                    <button
+                                        className="w-full bg-blue-500 text-white py-2 rounded mt-2"
+                                        onClick={handleAddComment}
+                                    >
+                                        Add Comment
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
 
-            {/* Mobile Main Content and Comments  */}
-            <div className="md:hidden flex-1 p-4">
-                <h2 className="text-2xl font-bold mb-2">
-                    {selectedWorkspaceName && (
-                        <span className="text-lg font-semibold text-gray-400 mr-2">
-                            {selectedWorkspaceName}
-                        </span>
-                    )}
-                    {video ? video.title : "Loading..."}
-                </h2>
+                {/* Mobile Main Content and Comments  */}
+                <div className="md:hidden flex-1 p-4">
+                    <h2 className="text-2xl font-bold mb-2">
+                        {selectedWorkspaceName && (
+                            <span className="text-lg font-semibold text-gray-400 mr-2">
+                                {selectedWorkspaceName}
+                            </span>
+                        )}
+                        {video ? video.title : "Loading..."}
+                    </h2>
 
-                {/* Video Section - Mobile */}
-                <div className="mb-4">
-                    {isLoading ? (
-                        <div className="w-full aspect-video flex items-center justify-center bg-gray-800">
-                            <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-12 h-12"></div>
-                        </div>
-                    ) : (
-                        <video ref={videoRef} controls className="w-full aspect-video">
-                            <source src={video?.url} type="video/mp4" />
-                        </video>
-                    )}
-                </div>
-
-                {/* Comments Section - Mobile */}
-                <div className="bg-[#1e293b] overflow-y-auto p-4 rounded-lg shadow flex flex-col">
-                    <h5 className="text-xl font-bold mb-3">Comments</h5>
-                    {/* <h5 className="text-sm mb-3">
-                        Click the comment to see the frame the comment was related to
-                    </h5> */}
-
-                    {/* Error Message */}
-                    {error && <p className="text-red-500 mb-2">{error}</p>}
-
-                    {/* Name Input */}
-                    {(
-                        <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
-                        <span className="mr-2 opacity-50">Name:</span>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="bg-transparent border-none outline-none flex-1 text-white"
-                        />
-                    </div>
-                    )}
-
-                    {/* Comments List (Scrollable) */}
-                    <div className="flex-1 overflow-y-auto max-h-[50vh]">
-                        {comments === null ? (
-                            <div className="flex justify-center">
-                                <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-8 h-8"></div>
+                    {/* Video Section - Mobile */}
+                    <div className="mb-4">
+                        {isLoading ? (
+                            <div className="w-full aspect-video flex items-center justify-center bg-gray-800">
+                                <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-12 h-12"></div>
                             </div>
                         ) : (
-                            comments.map((c, index) => (
-                                <div
-                                    key={index}
-                                    className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
-                                    onClick={() => {
-                                        if (c.timestamp !== undefined) {
-                                            videoRef.current.currentTime = parseFloat(c.timestamp);
-                                        }
-                                    }}
-                                >
-                                    <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
-                                    <p className="text-white">{c.text || "No comment text"}</p>
-                                    <p className="text-xs text-gray-400">
-                                        ⏳{" "}
-                                        {c.timestamp !== undefined
-                                            ? parseFloat(c.timestamp).toFixed(2) + "s"
-                                            : "No timestamp"}
-                                    </p>
-                                </div>
-                            ))
+                            <video ref={videoRef} controls className="w-full aspect-video">
+                                <source src={video?.url} type="video/mp4" />
+                            </video>
                         )}
                     </div>
 
-                    {/* Comment Input and Button (Fixed at Bottom) */}
-                    <div className="mt-auto">
-                        <textarea
-                            placeholder="Add a comment..."
-                            value={commentText}
-                            onFocus={() => videoRef.current.pause()}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
-                        />
-                        <button
-                            className="w-full bg-blue-500 text-white py-2 rounded mt-2"
-                            onClick={handleAddComment}
-                        >
-                            Add Comment
-                        </button>
+                    {/* Comments Section - Mobile */}
+                    <div className="bg-[#1e293b] overflow-y-auto p-4 rounded-lg shadow flex flex-col">
+                        <h5 className="text-xl font-bold mb-3">Comments</h5>
+                        {/* <h5 className="text-sm mb-3">
+                        Click the comment to see the frame the comment was related to
+                    </h5> */}
+
+                        {/* Error Message */}
+                        {error && <p className="text-red-500 mb-2">{error}</p>}
+
+                        {/* Name Input */}
+                        {(
+                            <div className="w-full p-2 border rounded mb-2 bg-[#1e293b] text-white flex items-center">
+                                <span className="mr-2 opacity-50">Name:</span>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="bg-transparent border-none outline-none flex-1 text-white"
+                                />
+                            </div>
+                        )}
+
+                        {/* Comments List (Scrollable) */}
+                        <div className="flex-1 overflow-y-auto max-h-[50vh]">
+                            {comments === null ? (
+                                <div className="flex justify-center">
+                                    <div className="animate-spin border-4 border-gray-400 border-t-white rounded-full w-8 h-8"></div>
+                                </div>
+                            ) : (
+                                comments.map((c, index) => (
+                                    <div
+                                        key={index}
+                                        className="p-2 bg-[#283449] rounded cursor-pointer mb-2"
+                                        onClick={() => {
+                                            if (c.timestamp !== undefined) {
+                                                videoRef.current.currentTime = parseFloat(c.timestamp);
+                                            }
+                                        }}
+                                    >
+                                        <p className="text-sm font-bold text-white">{c.name || "Unknown"}</p>
+                                        <p className="text-white">{c.text || "No comment text"}</p>
+                                        <p className="text-xs text-gray-400">
+                                            ⏳{" "}
+                                            {c.timestamp !== undefined
+                                                ? parseFloat(c.timestamp).toFixed(2) + "s"
+                                                : "No timestamp"}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Comment Input and Button (Fixed at Bottom) */}
+                        <div className="mt-auto">
+                            <textarea
+                                placeholder="Add a comment..."
+                                value={commentText}
+                                onFocus={() => videoRef.current.pause()}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                className="w-full p-2 border rounded bg-[#1e293b] text-white placeholder-gray-400"
+                            />
+                            <button
+                                className="w-full bg-blue-500 text-white py-2 rounded mt-2"
+                                onClick={handleAddComment}
+                            >
+                                Add Comment
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {CreateWorkspace && ( <CreateWorkspaceModal setShowModal={setCreateWorkspace} setWorkspaces={setWorkspaces} />
-      )}
+                {CreateWorkspace && (<CreateWorkspaceModal setShowModal={setCreateWorkspace} setWorkspaces={setWorkspaces} />
+                )}
 
-        </div>
-    );
+            </div>
+            <Footer />
+            </div>
+            );
 }
 
-export default VideoPage;
+            export default VideoPage;

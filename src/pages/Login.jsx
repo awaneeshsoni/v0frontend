@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -46,6 +48,8 @@ function Login() {
   };
 
   return (
+    <div className="bg-gray-900 max-h-screen">
+    <Navbar />
     <div className="flex flex-col items-center min-h-screen justify-center bg-gray-900 text-white p-4"> {/* Added padding */}
       <h2 className="text-3xl font-bold mb-6">Welcome Back</h2>
 
@@ -91,6 +95,8 @@ function Login() {
           Sign Up
         </Link>
       </p>
+    </div>
+    <Footer />
     </div>
   );
 }
