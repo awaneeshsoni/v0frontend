@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import UploadVideoModal from "../components/UploadVideoModel";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModel";
@@ -13,6 +13,8 @@ function Workspace() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(false); // State for left sidebar
+  const sidebarRef = useRef(null); // Ref for the sidebar
 
   useEffect(() => {
     const fetchWorkspaces = async () => {
@@ -46,45 +48,182 @@ function Workspace() {
     fetchVideos();
   }, [wsid]);
 
-  return (
-    <div className="flex h-screen bg-[#0f172a] text-white">
-      {/* Left Sidebar */}
-      <div className="w-64 bg-[#1e293b] p-6 flex flex-col">
-        <h2 className="text-xl font-bold flex items-center gap-2">🔥 Flame</h2>
-        <h3 className="text-lg font-semibold mt-6">Workspaces</h3>
-        <div className="mt-4 space-y-2">
-          {workspaces.map((ws) => (
-            <button
-              key={ws._id}
-              className={`w-full text-left px-4 py-2 rounded-md ${
-                ws._id === wsid ? "bg-blue-500" : "bg-gray-700 hover:bg-gray-600"
-              }`}
-              onClick={() => navigate(`/workspace/${ws._id}`)}
-            >
-              {ws.name}
-            </button>
-          ))}
-        </div>
-        <div className="mt-auto">
-      <button
-        className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
-        onClick={() => setShowModal(true)} // Open modal on button click
-      >
-        Create New Workspace
-      </button>
+  useEffect(() => {
+    // Function to handle clicks outside the sidebar
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && showLeftSidebar) {
+        setShowLeftSidebar(false);
+      }
+    };
 
-      {/* Show the modal only when `showModal` is true */}
-      {showModal && (
-        <CreateWorkspaceModal
-          setShowModal={setShowModal} // Pass state updater to close modal
-          setWorkspaces={setWorkspaces} // Pass workspace state handler
-        />
+    // Add event listener when the sidebar is open
+    if (showLeftSidebar) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Clean up the event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showLeftSidebar]); // Only re-run if showLeftSidebar changes
+
+
+
+  return (
+    <div className="flex min-h-screen flex-col bg-[#0f172a] text-white">
+      {/* Mobile Navbar */}
+      <nav className="md:hidden  flex justify-between items-center p-4 bg-[#1e293b] sticky top-0 z-50">
+        <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="text-white">
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M4 6h16M4 12h16m-7 6h7"></path> {/* Hamburger for left */}
+          </svg>
+        </button>
+        <div className="flex items-center space-x-2 text-xl font-bold">
+            <span>🔥</span>
+            <h2>Flame</h2>
+          </div>
+          <button
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          onClick={() => setShowUploadModal(true)}
+        >
+          + Upload
+        </button>
+      </nav>
+
+      {/* Combined Sidebar (Mobile) */}
+      {showLeftSidebar && (
+        <div ref={sidebarRef} className="md:hidden absolute left-0 top-[60px] bg-[#1e293b] w-full z-40">
+           <h3 className="text-lg font-semibold p-4">Workspaces</h3>
+          <div className="p-4 space-y-2">
+            {workspaces.map((ws) => (
+              <button
+                key={ws._id}
+                className={`w-full text-left px-4 py-2 rounded-md ${
+                  ws._id === wsid ? "bg-blue-500" : "bg-gray-700 hover:bg-gray-600"
+                }`}
+                onClick={() => { navigate(`/workspace/${ws._id}`); setShowLeftSidebar(false);}}
+              >
+                {ws.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-4">
+           <button
+            className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
+            onClick={() => {setShowModal(true); setShowLeftSidebar(false)}}
+            >
+                Create New Workspace
+            </button>
+          </div>
+        </div>
       )}
-    </div>
+
+      {/* Desktop Layout */}
+      <div className=" min-h-screen hidden md:flex flex-row h-full">
+        {/* Left Sidebar (Desktop) */}
+        <div className="w-64  bg-[#1e293b] p-6 flex flex-col">
+          <h2 className="text-xl font-bold flex items-center gap-2">🔥 Flame</h2>
+          <h3 className="text-lg font-semibold mt-6">Workspaces</h3>
+          <div className="mt-4 space-y-2">
+            {workspaces.map((ws) => (
+              <button
+                key={ws._id}
+                className={`w-full text-left px-4 py-2 rounded-md ${
+                  ws._id === wsid ? "bg-blue-500" : "bg-gray-700 hover:bg-gray-600"
+                }`}
+                onClick={() => navigate(`/workspace/${ws._id}`)}
+              >
+                {ws.name}
+              </button>
+            ))}
+          </div>
+          <div className="mt-auto">
+            <button
+              className="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
+              onClick={() => setShowModal(true)}
+            >
+              Create New Workspace
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content (Desktop) */}
+        <div className="flex-1 p-10">
+            <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-bold mb-6">
+                {currentWorkspace ? `Videos in "${currentWorkspace.name}"` : "Loading..."}
+                </h2>
+                 <button
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    onClick={() => setShowUploadModal(true)}
+                    >
+                    + Upload
+                </button>
+            </div>
+
+          {videos.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {videos.map((video) => (
+                <div
+                  key={video._id}
+                  className="bg-gray-100 text-black rounded-lg shadow-md cursor-pointer hover:bg-gray-200 transition flex flex-col justify-between p-2 aspect-square"
+                  onClick={() => navigate(`video/${video._id}`)}
+                >
+                  <div className="flex-1 flex items-center justify-center">📺</div>
+                  <h3 className="text-xs font-medium text-center text-gray-800 mt-2 truncate">
+                    🎬 {video.title}
+                  </h3>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400">No videos found.</p>
+          )}
+        </div>
+
+        {/* Right Sidebar (Desktop) */}
+        <div className="w-64 bg-[#1e293b] p-6 flex flex-col">
+
+          <h3 className="text-lg font-semibold">Creator</h3>
+          {currentWorkspace?.creator && (
+            <div className="w-full text-left px-4 py-2 rounded-lg bg-gray-700 font-bold">
+              {currentWorkspace.creator.name} (Creator)
+            </div>
+          )}
+
+          <h3 className="text-lg font-semibold mt-4">Members</h3>
+          <div className="mt-4 space-y-2 flex-1">
+            {currentWorkspace?.members.length > 0 ? (
+              currentWorkspace.members.map((member) => (
+                <button
+                  key={member._id}
+                  className="w-full text-left px-4 py-2 rounded-lg bg-gray-600"
+                >
+                  {member.name}
+                </button>
+              ))
+            ) : (
+              <p className="text-gray-400">No members found.</p>
+            )}
+          </div>
+          <button className="w-full bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 mt-4">
+            Add Member
+          </button>
+          <div className="mt-4 text-sm text-gray-400">Storage Used: 5GB / 20GB</div>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-10">
+      {/* Mobile Main Content  */}
+       <div className="md:hidden flex-1 p-4">
         <h2 className="text-3xl font-bold mb-6">
           {currentWorkspace ? `Videos in "${currentWorkspace.name}"` : "Loading..."}
         </h2>
@@ -93,12 +232,12 @@ function Workspace() {
             {videos.map((video) => (
               <div
                 key={video._id}
-                className="w-32 h-32 bg-gray-100 text-black rounded-lg shadow-md cursor-pointer hover:bg-gray-200 transition flex flex-col justify-between p-2"
+                className="bg-gray-100 text-black rounded-lg shadow-md cursor-pointer hover:bg-gray-200 transition flex flex-col justify-between p-2 aspect-square"
                 onClick={() => navigate(`video/${video._id}`)}
               >
                 <div className="flex-1 flex items-center justify-center">📺</div>
-                <h3 className="text-xs font-medium text-center text-gray-800 mt-2">
-                  🎬 {video.title}
+                <h3 className="text-xs font-medium text-center text-gray-800 mt-2 truncate">
+                    🎬 {video.title}
                 </h3>
               </div>
             ))}
@@ -108,44 +247,10 @@ function Workspace() {
         )}
       </div>
 
-      {/* Right Sidebar */}
-      <div className="w-64 bg-[#1e293b] p-6 flex flex-col">
-        <button
-          className="w-full bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 mb-4"
-          onClick={() => setShowUploadModal(true)}
-        >
-          Upload Video
-        </button>
-        <h3 className="text-lg font-semibold">Creator</h3>
-        {currentWorkspace?.creator && (
-          <div className="w-full text-left px-4 py-2 rounded-lg bg-gray-700 font-bold">
-            {currentWorkspace.creator.name} (Creator)
-          </div>
-        )}
-
-        <h3 className="text-lg font-semibold mt-4">Members</h3>
-        <div className="mt-4 space-y-2 flex-1">
-          {currentWorkspace?.members.length > 0 ? (
-            currentWorkspace.members
-              // .filter((member) => member._id !== currentWorkspace.creator._id) // Remove duplicate
-              .map((member) => (
-                <button
-                  key={member._id}
-                  className="w-full text-left px-4 py-2 rounded-lg bg-gray-600"
-                >
-                  {member.name}
-                </button>
-              ))
-          ) : (
-            <p className="text-gray-400">No members found.</p>
-          )}
-        </div>
-        <button className="w-full bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 mt-4">
-          Add Member
-        </button>
-        <div className="mt-4 text-sm text-gray-400">Storage Used: 5GB / 20GB</div>
-      </div>
-
+      {/* Modals */}
+      {showModal && (
+        <CreateWorkspaceModal setShowModal={setShowModal} setWorkspaces={setWorkspaces} />
+      )}
       {showUploadModal && (
         <UploadVideoModal wsid={wsid} onClose={() => setShowUploadModal(false)} setVideos={setVideos} />
       )}
